@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<script type="text/javascript" src="default.js"></script>
+	<link rel="stylesheet" href="css/default.css" type="text/css" />
+	<title>ExTools for FreeCAD</title>
+</head>
+<body>
+	<h1>ExTools for FreeCAD</h1>
+	<div class="date">Last Update : 4/11/2016</div>
+	<div class="version">Version : 0.15.0.0</div>
+	<h2>What is ExTools for FreeCAD?</h2>
+	<p>ExTools for FreeCAD (<strong>Ex</strong>tension<strong> tools for FreeCAD</strong>) are unofficial plugins for <a href="http://www.freecadweb.org/" target="_blank">FreeCAD</a>.</p>
+	<p>FreeCAD is an open source 3D CAD software, so ExTools for FreeCAD are also open source.</p>
+	<h2>License</h2>
+	<p>ExTools for FreeCAD is licenced under  LGPL version 2.1/3. Please check <a href="doc/LICENSE.txt">the license agreement</a>.</p>
+	<h2>Installing &amp; Uninstalling</h2>
+	<p>Download ExToolsForFreeCAD.zip and extract it.</p>
+	<h3>Windows</h3>
+	<p>
+		Install - Click "install.js". The files will be copied to "%AppData%\FreeCAD" and the settings will be written to "user.cfg".<br />
+		Uninstall - Click "uninstall.js" or "%AppData%\FreeCAD\uninstall-ExTools.js".
+	</p>
+	<h3>Linux and Mac OS X</h3>
+	<p>
+		Install - Run "install.py" on Python 2.7.x. The files will be copied to "$HOME/.FreeCAD" and the settings will be written to "user.cfg".<br />
+		Uninstall - Run "uninstall.py" or "%AppData%\FreeCAD\uninstall-ExTools.py"  on Python 2.7.x.
+	</p>
+	<h2 id="ToolList">Tool list</h2>
+	<ul>
+		<li><a href="#FunctionPolyline">Function Polyline</a></li>
+		<li><a href="#ShapeInformation">Shape Information</a></li>
+	</ul>
+	<h2 id="FunctionPolyline">Function Polyline</h2>
+	<table class="tools">
+	<tbody>
+		<tr>
+			<td>Description</td>
+			<td>
+				You can draw a polyline according to a mathematical formula with this tool.<br />
+				The formula is defined by Python format math function.<br />
+				For example,  "y=1.2x<sup>2</sup>+10sin(x)" is expressed as  "y = 1.2*x**2 + 10 * math.sin(x)".<br />
+			</td>
+		</tr>
+		<tr><td>Icon</td><td><img src="images/FunctionPolyline.png" alt="FunctionPolyline" /></td></tr>
+		<tr><td>Accelerator key</td><td>Alt + P</td></tr>
+	</tbody>
+	</table>
+	<h3>Explicit Function</h3>
+	<p>Enter the sketch editing mode on Part Design workbench or Sketcher workbench.</p>
+	<p>Click <img src="images/FunctionPolyline.png" alt="FunctionPolyline" class="icon" /> to show Function Polyline Tool dialog.</p>
+	<div class="imagebox">
+		<img src="images/FunctionPolyline-Explicit.png" alt="FunctionPolyline-Explicit" class="screenshot-orig-noboder" />
+		<span>Explicit Function tab</span>
+	</div><div class="clear" />
+	<p>You can use y=f(x) type formula on Explicit Function tab.</p>
+	<p>Enter a formula, range of x and number of sampling x. Click <span class="button">Add</span> to draw the polyline.</p>
+	<div class="imagebox">
+		<img src="images/FunctionPolyline-Explicit2.png" alt="FunctionPolyline-Explicit2" class="screenshot-m-noboder" />
+		<span>Result of Explicit Function</span>
+	</div><div class="clear" />
+	<h3>Implicit Function</h3>
+	<p>Enter the sketch editing mode on Part Design workbench or Sketcher workbench.</p>
+	<p>Click <img src="images/FunctionPolyline.png" alt="FunctionPolyline" class="icon" /> to show Function Polyline Tool dialog.</p>
+	<div class="imagebox">
+		<img src="images/FunctionPolyline-Implicit.png" alt="FunctionPolyline-Implicit" class="screenshot-orig-noboder" />
+		<span>Implicit Function tab</span>
+	</div><div class="clear" />
+	<p>You can use (x=f<sub>1</sub>(t), y=f<sub>2</sub>(t)) type formula on Implicit Function tab.</p>
+	<p>Enter a formula, range of t and number of sampling t. Click <span class="button">Add</span> to draw the polyline.</p>
+	<div class="imagebox">
+		<img src="images/FunctionPolyline-Implicit2.png" alt="FunctionPolyline-Implicit2" class="screenshot-m-noboder" />
+		<span>Result of Implicit Function</span>
+	</div><div class="clear" />
+	<h2 id="ShapeInformation">Shape Information</h2>
+	<table class="tools">
+		<tbody>
+			<tr><td>Description</td><td>You can confirm surface area, volume and center of mass for selected object with this tool.</td></tr>
+			<tr><td>Icon</td><td><img src="images/ShapeInformation.png" alt="ShapeInformation" /></td></tr>
+			<tr><td>Accelerator key</td><td>Alt + I</td></tr>
+		</tbody>
+	</table>
+	<p>Select object(s) on model tree or 3D view and click <img src="images/ShapeInformation.png" alt="ShapeInformation" class="icon" /> to show Shape Information dialog.</p>
+	<p>If you selected more than one object, you can switch the shape infomation with the combobox on top of dialog.</p>
+	<div class="imagebox">
+		<img src="images/ShapeInformation-Solid.png" alt="ShapeInformation-Solid" class="screenshot-orig-noboder" />
+		<span>Shape Information result</span>
+	</div><div class="clear" />
+	<p>If you checked "Decompose compound object" checkbox, each solid in a compound objects (like an array) is treated as a shape.</p>
+	<div class="imagebox">
+		<img src="images/ShapeInformation-Compound.png" alt="ShapeInformation-Compound" class="screenshot-m-noboder" />
+		<span>4 solids in 1 array object are treated as 4 shapes by checking "Decompose compound object"</span>
+	</div><div class="clear" />
+</body>
+</html>

@@ -1,0 +1,113 @@
+﻿@charset "utf-8";
+body{
+	margin-top:30px;
+	margin-bottom:30px;
+	margin-right:100px;
+	margin-left:100px;
+	font-family : "HiraKakuProN-W6", "ヒラギノ角ゴ ProN W6",  Meiryo, メイリオ, sans-serif;
+	color:#666666;
+}
+.date{
+	font-weight: bold;
+	margin: 1em 0em;
+	text-align:right;
+}
+.version{
+	font-weight: bold;
+	margin: 1em 0em;
+	text-align:right;
+}
+/*** link ***/
+a{
+	text-decoration: none;
+}
+a:link{}
+a:visited{
+	color: purple; 
+}
+a:hover{
+	text-decoration: underline;
+}
+a:active{
+	color: yellow;
+}
+/*** images layout ***/
+div.imagebox{
+	float: left;
+}
+.imagebox span{
+	display: block;
+	text-align: center;
+}
+div.clear{
+	clear: both;
+}
+/*** images size ***/
+img.screenshot-orig-noboder{}
+img.screenshot-m-noboder{
+	width: 800px;
+}
+img.icon{
+	width: 32px;
+	vertical-align: middle;
+}
+/*** Footer ***/
+div.pageMove{
+	margin:20px 0px;
+	text-align: center;
+}
+span.foot-index-current{
+	padding:5px 10px;
+	font-size:1.1em;
+	color:#ffffff;
+	background-color:#999999;
+}
+a.foot-index{
+	padding:5px 10px;
+	font-size:1.1em;
+	color:#ffffff;
+	background-color:#33ccff;
+}
+a.foot-index:hover{
+	background-color:#0099ff;
+	text-decoration: none;
+}
+.tools{
+	width:100%;
+	border-collapse: separate;
+	border-spacing: 0px;
+	border-top: 1px solid #ccc;
+	border-left: 1px solid #ccc;
+	margin-bottom:1.5em;
+}
+
+.tools caption{
+	font-size: 1.5em;
+	color: #444;
+	background-color: #ccc;
+}
+.tools td{
+	padding: 4px;
+	text-align: left;
+	background-color: #fafafa;
+	border-right: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+}
+.tools img{
+	text-align: left;
+	width: 32px!important;
+}
+
+.license{
+	padding: 1em;
+	background-color:#f9f9f9;
+	border: 1px solid #dddddd;
+	display:inline-block;
+}
+div.license-clear{
+	clear: both;
+}
+span.button{
+	font-weight: bold;
+	color:black;
+}

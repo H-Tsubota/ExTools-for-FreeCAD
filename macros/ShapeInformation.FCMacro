@@ -1,0 +1,157 @@
+# -*- coding: utf-8 -*- 
+
+###
+#Copyright (c) 2016, H. Tsubota
+#All rights reserved.
+#Licensed under LGPL v3
+###
+
+from PySide.QtCore import *
+from PySide.QtGui import *
+
+class ShapeInformationUI(QDialog):
+	class Info:
+		def __init__(self, solid=None):
+			if solid is None:
+				self.Area = 0.0
+				self.Volume = 0.0
+				self.CenterOfMass = [0.0, 0.0, 0.0]
+			else:
+				self.Area = solid.Area
+				self.Volume = solid.Volume
+				self.CenterOfMass = solid.CenterOfMass
+		def set(self, area, volume, cx, cy, cz):
+			self.Area = area
+			self.Volume = volume
+			self.CenterOfMass[0] = cx
+			self.CenterOfMass[1] = cy
+			self.CenterOfMass[2] = cz
+
+	def __init__(self, objects, parent=None):
+		super(ShapeInformationUI, self).__init__(parent)
+		self.setWindowFlags(Qt.WindowStaysOnTopHint)
+		self.setWindowTitle(self.tr("Shape Information"))
+		self.objects = objects
+		
+		decomposing = True
+		self.initData(decomposing)
+
+		# combo box to select object
+		self.objects_combo = QComboBox()
+		self.objects_combo.activated.connect(self.setTable) 
+
+		# table to show object info
+		self.table_widget = QTableWidget(4, 1)
+		vheader = QHeaderView(Qt.Orientation.Vertical)
+		vheader.setResizeMode(QHeaderView.Stretch)
+		self.table_widget.setVerticalHeader(vheader)
+		self.table_widget.setVerticalHeaderLabels(["Object Name", "Area", "Volume", "Center Of Mass"])
+		hheader = QHeaderView(Qt.Orientation.Horizontal)
+		hheader.setResizeMode(QHeaderView.Stretch)
+		self.table_widget.setHorizontalHeader(hheader)
+		self.table_widget.setHorizontalHeaderLabels(["Value"])
+
+		# checkbox to decompose compound (i.e. multi-solid) object
+		type_checkbox = QCheckBox("Decompose compound object")
+		if decomposing:
+			type_checkbox.setCheckState(Qt.Checked)
+		else:
+			type_checkbox.setCheckState(Qt.Unchecked)
+		type_checkbox.stateChanged.connect(self.toggleDecomposing)
+
+		# Button to close the dialog
+		button_box = QDialogButtonBox(QDialogButtonBox.Close)
+		button_box.rejected.connect(self.reject)
+
+		# layout widgets
+		layout = QVBoxLayout()
+		layout.addWidget(self.objects_combo)
+		layout.addWidget(self.table_widget)
+		layout.addWidget(type_checkbox)
+		layout.addWidget(button_box)
+		self.setLayout(layout)
+
+		# set data
+		self.objects_combo.addItems(self.labels)
+		self.setTable(0)
+
+		self.adjustSize()
+		self.resize(330, self.height())
+		self.setFixedHeight(self.height())
+
+	def initData(self, decomposing=False):
+		self.labels = []
+		self.solids = {}
+		for obj in self.objects:
+			shape = obj.Shape
+			num_solids = len(shape.Solids)
+			if num_solids == 1:
+				self.labels.append(obj.Label)
+				self.solids[obj.Label] = [obj.Name, self.Info(shape.Solids[0])]
+			else:
+				if decomposing:
+					count = 0
+					for s in shape.Solids:
+						label = obj.Label + " - " + str(count)
+						self.labels.append(label)
+						self.solids[label] = [obj.Name, self.Info(s)]
+						count+=1
+				else:
+					area = 0.0
+					volume = 0.0
+					c = [0.0, 0.0, 0.0]
+					for s in shape.Solids:
+						area += s.Area
+						volume += s.Volume
+						c[0] += s.CenterOfMass[0]
+						c[1] += s.CenterOfMass[1]
+						c[2] += s.CenterOfMass[2]
+					centerOfMass = [x / num_solids for x in c]
+					sum = self.Info()
+					sum.set(area, volume, centerOfMass[0], centerOfMass[1], centerOfMass[2])
+					self.labels.append(obj.Label)
+					self.solids[obj.Label] = [obj.Name, sum]
+	
+	def setTable(self, index):
+		if len(self.labels) < 1:
+			return
+
+		label = self.labels[index]
+		if(not self.solids.has_key(label)):
+			return
+		
+		# set selected index's object info to the table
+		s = self.solids[label][1]
+		name = self.solids[label][0]
+		item_name = QTableWidgetItem(str(name))
+		item_area = QTableWidgetItem(str(s.Area))
+		item_volume = QTableWidgetItem(str(s.Volume))
+		item_center_of_mass = QTableWidgetItem("{0:f}, {1:f}, {2:f}".format(s.CenterOfMass[0], s.CenterOfMass[1], s.CenterOfMass[2]))
+		self.table_widget.setItem(0, 0, item_name)		
+		self.table_widget.setItem(1, 0, item_area)		
+		self.table_widget.setItem(2, 0, item_volume)		
+		self.table_widget.setItem(3, 0, item_center_of_mass)
+
+	def toggleDecomposing(self, state):
+		decomposing = False
+		if(state==0):
+			decomposing = False
+		elif(state==2):
+			decomposing = True
+
+		self.initData(decomposing)
+		self.objects_combo.clear()
+		self.objects_combo.addItems(self.labels)
+		self.setTable(0)
+
+objects = FreeCADGui.Selection.getSelection()
+if 0 < len(objects):
+	ui = ShapeInformationUI(objects)
+
+	if len(ui.labels) < 1:
+		QMessageBox.information(None, None, "There is no solid in selected objects.")
+	else:
+		ui.setModal(True)
+		ui.show()
+else:
+	QMessageBox.information(None, None, "Please select the objects at first.")

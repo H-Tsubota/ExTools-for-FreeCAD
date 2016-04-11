@@ -1,0 +1,243 @@
+# -*- coding: utf-8 -*- 
+
+###
+#Copyright (c) 2016, H. Tsubota
+#All rights reserved.
+#Licensed under LGPL v3
+###
+
+class FunctionPolyline:
+	def __draw(self, current_sketch, points):
+		imax = len(points)-1
+		for index,value in enumerate(points):
+			if index < imax:
+				p = points[index]
+				p_next = points[index+1]
+				current_sketch.addGeometry(Part.Line(App.Vector(p[0], p[1],0),App.Vector(p_next[0], p_next[1],0)))
+			if 0 < index  and index < imax:
+				num_geom = current_sketch.GeometryCount
+				current_sketch.addConstraint(Sketcher.Constraint("Coincident",num_geom-2 ,2, num_geom-1,1)) 
+
+	def implicit(self,current_sketch, func_x, func_y, begin_t, end_t, num_div):
+		if num_div < 1:
+			return
+		if not isinstance( num_div, int ):
+			return
+
+		import math
+		diff = (end_t-begin_t) / float(num_div)
+		points = []
+		i_range = range(0, num_div + 1)
+		for i in i_range:
+			t = begin_t + float(i)*diff
+			x = eval(func_x)
+			y = eval(func_y)
+			points.append([x, y])
+
+		self.__draw(current_sketch, points)
+
+	def explicit(self,current_sketch, func_y, begin_x, end_x, num_div):
+		if num_div < 1:
+			return
+		if not isinstance( num_div, int ):
+			return
+
+		import math
+		diff = (end_x-begin_x) / float(num_div)
+		points = []
+		i_range = range(0, num_div + 1)
+		for i in i_range:
+			x = begin_x + float(i)*diff
+			y = eval(func_y)
+			points.append([x, y])
+
+		self.__draw(current_sketch, points)
+
+from PySide.QtCore import *
+from PySide.QtGui import *
+
+class FunctionPolylineUI(QDialog):
+	def __init__(self, sketch, parent=None):
+		super(FunctionPolylineUI, self).__init__(parent)
+		self.setWindowFlags(Qt.WindowStaysOnTopHint)
+		self.setWindowTitle(self.tr("Function Polyline Tool"))
+
+		self.sketch = sketch
+
+		self.tabWidget = QTabWidget()
+		self.EXPLICIT = self.tabWidget.addTab(self.setupExplicitTab(), self.tr("Explicit Function"))
+		self.IMPLICIT = self.tabWidget.addTab(self.setupImplicitTab(), self.tr("Implicit Function"))
+
+		buttonBox = QDialogButtonBox(QDialogButtonBox.Close)
+		buttonBox.addButton(self.tr("Add"), QDialogButtonBox.AcceptRole)
+		buttonBox.accepted.connect(self.accept)
+		buttonBox.rejected.connect(self.reject)
+
+		layout = QVBoxLayout()
+		layout.addWidget(self.tabWidget)
+		layout.addWidget(buttonBox)
+		self.setLayout(layout)
+
+		self.adjustSize()
+		self.resize(360, self.height())
+		self.setFixedHeight(self.height())
+
+	def setExplicitPreset(self, index):
+		data = ["","",""]
+		if index == 1:
+			data[0] = "1.0*x**2 + 2.0*x +3.0"
+			data[1] = "-2.0"
+			data[2] = "2.0"
+
+		self.explicit_func_edit.setText(data[0])
+		self.explicit_start_edit.setText(data[1])
+		self.explicit_end_edit.setText(data[2])
+
+	def setupExplicitTab(self):
+		self.explicit_preset_combo = QComboBox()
+		self.explicit_preset_combo.addItems(["None", "Parabola"])
+		self.explicit_preset_combo.activated.connect(self.setExplicitPreset) 
+		self.explicit_func_edit = QLineEdit()
+		self.explicit_start_edit = QLineEdit()
+		self.explicit_end_edit = QLineEdit()
+		self.explicit_spin = QSpinBox()
+		self.explicit_spin.setValue(10)
+		layout = QGridLayout()
+		layout.addWidget(QLabel(self.tr("Preset")), 0, 0)
+		layout.addWidget(self.explicit_preset_combo, 0, 1)
+		layout.addWidget(QLabel("y = "), 1, 0)
+		layout.addWidget(self.explicit_func_edit, 1, 1)
+		layout.addWidget(QLabel(self.tr("Start of x")), 2, 0)
+		layout.addWidget(self.explicit_start_edit, 2, 1)
+		layout.addWidget(QLabel(self.tr("End of x")), 3, 0)
+		layout.addWidget(self.explicit_end_edit, 3, 1)
+		layout.addWidget(QLabel(self.tr("Number of data")), 4, 0)
+		layout.addWidget(self.explicit_spin, 4, 1)
+		tab = QWidget()
+		tab.setLayout(layout)
+		return tab
+
+	def setImplicitPreset(self, index):
+		data = ["","","",""]
+		if index == 1:
+			data[0] = "2.0 * (math.cos(t) + t * math.sin(t))"
+			data[1] = "2.0 * (math.sin(t) - t * math.cos(t))"
+			data[2] = "0"
+			data[3] = "360 * (math.pi / 180)"
+
+		self.implicit_func_x_edit.setText(data[0])
+		self.implicit_func_y_edit.setText(data[1])
+		self.implicit_start_edit.setText(data[2])
+		self.implicit_end_edit.setText(data[3])
+
+	def setupImplicitTab(self):
+		self.implicit_preset_combo = QComboBox()
+		self.implicit_preset_combo.addItems(["None", "Involute"])
+		self.implicit_preset_combo.activated.connect(self.setImplicitPreset) 
+		self.implicit_func_x_edit = QLineEdit()
+		self.implicit_func_y_edit = QLineEdit()
+		self.implicit_start_edit = QLineEdit()
+		self.implicit_end_edit = QLineEdit()
+		self.implicit_spin = QSpinBox()
+		self.implicit_spin.setValue(10)
+		layout = QGridLayout()
+		layout.addWidget(QLabel(self.tr("Preset")), 0, 0)
+		layout.addWidget(self.implicit_preset_combo, 0, 1)
+		layout.addWidget(QLabel("x = "), 1, 0)
+		layout.addWidget(self.implicit_func_x_edit, 1, 1)
+		layout.addWidget(QLabel("y = "), 2, 0)
+		layout.addWidget(self.implicit_func_y_edit, 2, 1)
+		layout.addWidget(QLabel(self.tr("Start of t")), 3, 0)
+		layout.addWidget(self.implicit_start_edit, 3, 1)
+		layout.addWidget(QLabel(self.tr("End of t")), 4, 0)
+		layout.addWidget(self.implicit_end_edit, 4, 1)
+		layout.addWidget(QLabel(self.tr("Number of data")), 5, 0)
+		layout.addWidget(self.implicit_spin, 5, 1)
+		tab = QWidget()
+		tab.setLayout(layout)	
+		return tab
+	
+	def __evalAsNumber(self, input):
+		import math		
+		import sys
+		try:
+			value = eval(input)
+		except:
+			info = sys.exc_info()
+			QMessageBox.information(self, self.windowTitle(), ">>" + input + " : \n" +str(info[1]))
+			return [False]
+
+		if(not isinstance(value, float) and not isinstance(value, int)):
+				QMessageBox.information(self, self.windowTitle(), self.tr("Start of x is not a number : ") + str(value))
+				return
+
+		return [True, value]
+
+	def __drawExplicit(self):
+		ret = self.__evalAsNumber(self.explicit_start_edit.text())
+		if(not ret[0]):
+			return
+		start = ret[1]
+
+		ret = self.__evalAsNumber(self.explicit_end_edit.text())
+		if(not ret[0]):
+			return
+		end = ret[1]
+
+		func = self.explicit_func_edit.text()
+		num_div = self.explicit_spin.value()			
+		try:
+			FunctionPolyline().explicit(self.sketch, func, start, end, num_div)
+		except:
+			import traceback				
+			QMessageBox.information(self, self.windowTitle(), self.tr("Error : \n") + traceback.format_exc(0))
+			return
+
+	def __drawImplicit(self):
+		ret = self.__evalAsNumber(self.implicit_start_edit.text())
+		if(not ret[0]):
+			return
+		start = ret[1]
+
+		ret = self.__evalAsNumber(self.implicit_end_edit.text())
+		if(not ret[0]):
+			return
+		end = ret[1]
+
+		func_x = self.implicit_func_x_edit.text()
+		func_y = self.implicit_func_y_edit.text()
+		num_div = self.implicit_spin.value()
+		try:
+			FunctionPolyline().implicit(self.sketch, func_x, func_y, start, end, num_div)
+		except:
+			import traceback				
+			QMessageBox.information(self, self.windowTitle(), self.tr("Error : \n") + traceback.format_exc(0))
+			return	
+
+	def accept(self):
+		tab = self.tabWidget.currentIndex()
+		if(tab == self.EXPLICIT):
+			self.__drawExplicit()
+		elif(tab == self.IMPLICIT):
+			self.__drawImplicit()
+		App.ActiveDocument.recompute()
+
+def checkFunctionPolyline():
+	active_doc = Gui.activeDocument()
+	error_message = ""
+	if(active_doc == None):
+		error_message = "Please create new document at first."
+	else:
+		view_provider = active_doc.getInEdit()
+		if((view_provider == None) or (view_provider.Object.TypeId != "Sketcher::SketchObject")):
+			error_message = "Please select a sketch and enter editing mode."
+	return error_message
+
+message = checkFunctionPolyline();
+if (message == ""):
+	view_provider = Gui.activeDocument().getInEdit()
+	ui = FunctionPolylineUI(view_provider.Object)
+	ui.setModal(True)
+	ui.show()
+else:
+	QMessageBox.information(None, None, message)
